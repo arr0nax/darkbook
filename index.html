@@ -9,6 +9,21 @@ async defer></script>
     <script src="scripts.js" ></script>
   </head>
   <body>
-    <div id="map"></div>
+    <div class="container">
+      <div class="info">
+        <input id='files' type="file" name="" value="">
+        <div class="instructions">
+          <p>this site uses your facebook login data to show you where youve logged in to facebook since you made your account. it requires you to download a copy of your facebook data. please be careful with the data, as it contains private information like messages and photos. this site doesn't store any information or preserve your data in any way. instructions below</p>
+          <ol>
+            <li>go to facebook > settings</li>
+            <li>there is a link on the first page to download all your data. click it. it may take a few minutes for it to be ready for you.</li>
+            <li>once your data is downloaded, unzip the file (double click on mac)</li>
+            <li>now hit choose file above^ and select "security.htm" (the path is facebook-yourname > html > security.htm)</li>
+            <li>your markers are there! zoom out to see them. </li>
+          </ol>
+        </div>
+      </div>
+      <div id="map"></div>
+    </div>
   </body>
 </html>

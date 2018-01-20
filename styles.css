@@ -1,7 +1,21 @@
 body {
   padding: 0;
   margin: 0;
+  height: 100vh;
+  width: 100vw;
 }
+
+.container {
+  display: flex;
+  flex-direction: row;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  width: 300px;
+}
+
 
 #map {
   height: 100vh;
