@@ -5,6 +5,10 @@ body {
   width: 100vw;
 }
 
+ul {
+  
+}
+
 .container {
   display: flex;
   flex-direction: row;
