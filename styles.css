@@ -5,8 +5,8 @@ body {
   width: 100vw;
 }
 
-ul {
-  
+#response > li {
+  border-bottom: 1px solid grey;
 }
 
 .container {

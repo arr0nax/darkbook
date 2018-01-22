@@ -1,34 +1,36 @@
 var map;
 var readers = [];
-var messages = {
-  a: [],
-  b: [],
-  c: [],
-  d: [],
-  e: [],
-  f: [],
-  g: [],
-  h: [],
-  i: [],
-  j: [],
-  k: [],
-  l: [],
-  m: [],
-  n: [],
-  o: [],
-  p: [],
-  q: [],
-  r: [],
-  s: [],
-  t: [],
-  u: [],
-  v: [],
-  w: [],
-  x: [],
-  y: [],
-  z: [],
-  und: [],
-}
+// var messages = {
+//   a: [],
+//   b: [],
+//   c: [],
+//   d: [],
+//   e: [],
+//   f: [],
+//   g: [],
+//   h: [],
+//   i: [],
+//   j: [],
+//   k: [],
+//   l: [],
+//   m: [],
+//   n: [],
+//   o: [],
+//   p: [],
+//   q: [],
+//   r: [],
+//   s: [],
+//   t: [],
+//   u: [],
+//   v: [],
+//   w: [],
+//   x: [],
+//   y: [],
+//   z: [],
+//   und: [],
+// }
+
+var messages = [];
 
 var markers = [
   {lat: -25.363, lng: 131.044},
@@ -64,7 +66,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
   document.getElementById("chat").addEventListener("keypress",function(e) {
     if (e.keyCode === 13) {
       const message_input = document.getElementById("chat").value;
-      document.getElementById('response').innerHTML = "<ul>"+message_input+"</ul>" + document.getElementById('response').innerHTML;
+      document.getElementById('response').innerHTML = "<ul>you: "+message_input+"</ul>" + document.getElementById('response').innerHTML;
       document.getElementById("chat").value = '';
       generateResponse(message_input);
     }
@@ -125,33 +127,48 @@ function parseIPs(res) {
 
 }
 
+// function parseMessage(message) {
+//   var doc = parser.parseFromString(message, "text/html");
+//   var unparsed = doc.getElementsByTagName("p");
+//   for (var i = 1; i < unparsed.length; i++) {
+//     if (unparsed[i].innerText[0]) {
+//       if (unparsed[i].innerText[0].match(/^[a-zA-Z]$/)) {
+//         if (unparsed[i-1].innerText) {
+//           messages[unparsed[i].innerText[0].toLowerCase()].push({
+//             sent: unparsed[i].innerText,
+//             response: unparsed[i-1].innerText,
+//           })
+//         }
+//       } else {
+//         if (unparsed[i-1].innerText) {
+//           messages.und.push({
+//             sent: unparsed[i].innerText,
+//             response: unparsed[i-1].innerText,
+//           })
+//         }
+//       }
+//     }
+//   }
+//
+// }
+
 function parseMessage(message) {
   var doc = parser.parseFromString(message, "text/html");
   var unparsed = doc.getElementsByTagName("p");
   for (var i = 1; i < unparsed.length; i++) {
     if (unparsed[i].innerText[0]) {
-      if (unparsed[i].innerText[0].match(/^[a-zA-Z]$/)) {
-        if (unparsed[i-1].innerText) {
-          messages[unparsed[i].innerText[0].toLowerCase()].push({
-            sent: unparsed[i].innerText,
-            response: unparsed[i-1].innerText,
-          })
-        }
-      } else {
-        if (unparsed[i-1].innerText) {
-          messages.und.push({
-            sent: unparsed[i].innerText,
-            response: unparsed[i-1].innerText,
-          })
-        }
-      }
+      messages.push({
+        sent: unparsed[i].innerText,
+        response: unparsed[i-1].innerText,
+      });
     }
   }
-
 }
 
+
 function generateResponse(input) {
-  const clean = input.toLowerCase();
+  const clean = splitAndClean(input);
+
   var candidates = {
     count: 0,
     messages: [
@@ -159,28 +176,63 @@ function generateResponse(input) {
     ]
   };
 
-  for (var i=0; i<messages[clean[0]].length; i++) {
-    var currentCount = 0;
-    for (var j=0; j<clean.length; j++) {
-      if (messages[clean[0]][i].sent[j]) {
-        if (clean[j] === messages[clean[0]][i].sent[j].toLowerCase()) {
-          currentCount++;
-        }
-      }
-    }
-    if (currentCount < candidates.count) {
+  // for (var i=0; i<messages[clean[0]].length; i++) {
+  //   var currentCount = 0;
+  //
+  //   for (var j=0; j<clean.length; j++) {
+  //     if (messages[clean[0]][i].sent[j]) {
+  //       if (clean[j] === messages[clean[0]][i].sent[j].toLowerCase()) {
+  //         currentCount++;
+  //       }
+  //     }
+  //   }
+  //   if (currentCount === candidates.count) {
+  //     candidates.messages.push(messages[clean[0]][i])
+  //   } else if (currentCount > candidates.count) {
+  //     candidates.count = currentCount;
+  //     candidates.messages = [
+  //       messages[clean[0]][i]
+  //     ]
+  //   }
+  // }
 
-    } else if (currentCount === candidates.count) {
-      candidates.messages.push(messages[clean[0]][i])
-    } else if (currentCount > candidates.count) {
-      candidates.count = currentCount;
-      candidates.messages = [
-        messages[clean[0]][i]
-      ]
-    }
+  for (var i=0; i<messages.length; i++) {
+    var candidate = splitAndClean(messages[i].sent);
+    var count = compareArrays(clean, candidate);
+    if (count === candidates.count) {
+       candidates.messages.push(messages[i])
+     } else if (count > candidates.count) {
+       candidates.count = count;
+       candidates.messages = [
+         messages[i]
+       ]
+     }
   }
 
   console.log(candidates);
 
-  document.getElementById('response').innerHTML = "<ul>" + candidates.messages[Math.floor(Math.random()*candidates.messages.length)].response + "</ul>" + document.getElementById('response').innerHTML;
+  document.getElementById('response').innerHTML = "<ul>bot: " + candidates.messages[Math.floor(Math.random()*candidates.messages.length)].response + "</ul>" + document.getElementById('response').innerHTML;
+}
+
+function splitAndClean(string) {
+  var one = string.toLowerCase();
+  var two = one.split(" ");
+  var three = two.map(word => {
+    return word.replace(/[^0-9a-z]/gi, '');
+  })
+  return three;
+
+}
+
+function compareArrays(input, candidate) {
+  var count = 0;
+  for (var i = 0; i<input.length; i++) {
+    for (var j = 0; j<candidate.length; j++) {
+      if (candidate[j] === input[i]) {
+        count++;
+        break;
+      }
+    }
+  }
+  return count;
 }
